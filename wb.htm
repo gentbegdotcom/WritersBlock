@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>The Writer's Block</title>
+<style>
+  /* Reset and base */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    background: #f2f0ef;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #222;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    user-select: text;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  /* Toolbar */
+  #toolbar {
+    background-color: #ffffffdd;
+    border-bottom: 1px solid #ccc;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: saturate(180%) blur(8px);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    justify-content: space-between; /* this pushes items to opposite ends*/
+  }
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 8px;
+    font-size: 16px;
+    border-radius: 4px;
+    transition: background-color 0.15s ease, color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+  }
+  button:hover {
+    background-color: #e0e0e0;
+  }
+  button:focus {
+    /*outline: 2px solid #0078d4;*/
+    outline-offset: 2px;
+  }
+  button svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    transition: fill 0.3s ease;
+  }
+  /* About Button */
+  #aboutBtn{
+    font-weight: 900;
+    font-size: 24px;
+  }
+  /* Font size buttons specifically */
+  #decreaseFontBtn, #increaseFontBtn {
+    font-family: Arial, sans-serif;
+    line-height: 1;
+    user-select: none;
+    /* Color will inherit from button's text color */
+  }
+  #decreaseFontBtn {
+    font-weight: 100;
+    font-size: 18px;
+  }
+  #increaseFontBtn {
+    font-weight: 900;
+    font-size: 24px;
+  }
+  /* Editor area */
+  #editor {
+    flex: 1;
+    padding: 15px 20px;
+    font-size: 18px;
+    line-height: 1.5;
+    overflow-y: auto;
+    background-color: transparent;
+    outline: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 100%;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100vw;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    color: inherit;
+  }
+  /* Dark mode styles */
+  body.dark-mode {
+    background-color: #003300;
+    color: #009900;
+    font-family: 'monospace', Consolas, Courier New, Monaco, sans-serif;
+    font-weight: 600;
+  }
+  body.dark-mode #toolbar {
+    background-color: rgba(0, 51, 0, 0.9);
+    border-bottom-color: #009900;
+  }
+  body.dark-mode #toolbar button:hover {
+    background-color: rgba(0, 77, 0, 0.6);
+  }
+  body.dark-mode button {
+    color: #009900;
+  }
+  body.dark-mode button svg {
+    fill: currentColor;
+  }
+  body.dark-mode #editor {
+    color: #009900;
+  }
+  /* Dark mode toggle button */
+ body.dark-mode #darkModeToggle {
+    color: #009900;
+ }
+ #darkModeToggle {
+    color: inherit;
+  }
+  #darkModeToggle:hover {
+    background-color: #e0e0e0;
+  }
+  #darkModeToggle:focus {
+    outline: none;
+    border-color: none;
+  }
+  #darkModeToggle svg {
+    display: block;
+  }
+  /* Responsive and mobile optimized */
+  @media (max-width: 600px) {
+    #toolbar {
+      padding: 4px 8px;
+      gap: 5px;
+      font-size: 14px;
+    }
+    button {
+      padding: 5px 6px;
+      font-size: 14px;
+    }
+    #editor {
+      font-size: 16px;
+      padding: 10px 12px;
+    }
+    #decreaseFontBtn {
+      font-size: 16px;
+    }
+    #increaseFontBtn {
+      font-size: 20px;
+    }
+  }
+#aboutBox {
+  background-color: #ccc;
+  border: 1px solid #ccc;
+  display: none; /*hide it*/
+  flex-direction: column; /*stack vertically*/
+  justify-content: flex-end; /*align right horizontally*/
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  border-radius: 5px; /* Optional: Rounded corners */
+  max-width: 50%;
+}
+
+#aboutBox h3 {
+  margin-top: 0;
+  align-self: flex-start; /*align heading to the left*/ 
+}
+
+#aboutBox p {
+    align-self: flex-start; /*align paragarphs to the left*/
+}
+#closeAboutBtn {
+  background: none;
+  border: 1px solid #000000;
+  outline: 1px solid #000000;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 200;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+  align-self: flex-end; /*align button right*/
+}
+
+#closeAboutBtn:hover {
+  background-color: #ccc;
+}
+/* Dark mode overrides for #aboutBox */
+body.dark-mode #aboutBox {
+    background-color: #ccc !important; /* Force the light background */
+    border-color: #ccc !important;     /* Force the light border */
+    color: #222 !important;         /* Force the light text color */
+}
+
+body.dark-mode #aboutBox h3 {
+    color: #333 !important;         /* Force the light heading color */
+}
+
+body.dark-mode #aboutBox p {
+    color: #444 !important;         /* Force the light paragraph color */
+}
+
+body.dark-mode #closeAboutBtn {
+    background-color: #ccc !important;
+    color: #000 !important;
+    border-color: #000 !important;
+}
+
+body.dark-mode #closeAboutBtn:hover {
+    background-color: #ccc !important;
+}
+ 
+</style>
+</head>
+<body>
+     
+    <div id="aboutBox">
+        <h3>About WritersBlock</h3>
+        <p><a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">CC0 1.0 Universal</a><br>This work has been dedicated to the public domain by its author.</p><p>Version 1.0</p>
+        <p>A simple, distraction-free word processor.</p>
+        <button type="abt" id="closeAboutBtn">Close</button>
+    </div>
+
+  <div id="toolbar" role="toolbar" aria-label="Text editor controls">
+    <div style="display: flex; align-items: center; gap: 8px;">
+    <button type="button" id="newBtn" title="New (Ctrl+N)" aria-label="New document" >
+      <svg viewBox="0 0 24 24"><path d="M3 3h18v2H3V3zm0 16h18v2H3v-2zm5-9h8v2H8v-2z"/></svg>
+    </button>
+    <button type="button" id="openBtn" title="Open (Ctrl+O)" aria-label="Open file">
+      <svg viewBox="0 0 24 24"><path d="M20 6v12H4V6h16m0-2H4c-1.1 0-2 .9-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6c0-1.1-.9-2-2-2zM8 12l4-4 4 4H8z"/></svg>
+    </button>
+    <button type="button" id="saveBtn" title="Save (Ctrl+S)" aria-label="Save file">
+      <svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v14a2 2 0 002 2h10c1.1 0 2-.9 2-2V7l-4-4zM7 19V5h8v4h-3v6H7z"/></svg>
+    </button>
+    <div style="border-left: 1px solid #ccc; height: 20px; margin: 0 10px;"></div>
+    <button type="button" id="decreaseFontBtn" title="Decrease font size" aria-label="Decrease font size">A</button>
+    <button type="button" id="increaseFontBtn" title="Increase font size" aria-label="Increase font size">A</button>
+    <div style="border-left: 1px solid #ccc; height: 20px; margin: 0 10px;"></div>
+    <button type="button" id="darkModeToggle" title="Toggle Dark Mode" aria-label="Toggle Dark Mode" tabindex="0">
+        <!-- Crescent moon icon -->
+       <svg viewBox="0 0 24 24">
+          <path d="M 12,0 A 8 8 0 1 0 12, 24 A 14 14 0 0 1 12, 0"/>
+       </svg>
+    </button>
+    </div>
+    <div>
+    <button type="button" id="aboutBtn" title="About Writer's Block" aria-label="About WB">WB</button>
+    </div>
+  </div>
+ 
+  
+  
+  <div id="editor" contenteditable="true" spellcheck="true" aria-label="Document text editor" role="textbox" aria-multiline="true"></div>
+
+  <input type="file" id="fileInput" accept=".txt,.html" style="display:none" />
+
+<script>
+/* about box */
+document.addEventListener("DOMContentLoaded", () => {
+  const aboutBtn = document.getElementById('aboutBtn');
+  const aboutBox = document.getElementById('aboutBox');
+  const closeAboutBtn = document.getElementById('closeAboutBtn');
+
+  aboutBtn.addEventListener('click', () => {
+    aboutBox.style.display = 'flex';
+  });
+
+  closeAboutBtn.addEventListener('click', () => {
+    aboutBox.style.display = 'none';
+  });
+
+  // Optional: Close the about box if the user clicks outside of it
+  window.addEventListener('click', (event) => {
+    if (event.target === aboutBox) {
+      aboutBox.style.display = 'none';
+    }
+  });
+});
+/* end about box */
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const editor = document.getElementById('editor');
+    const newBtn = document.getElementById('newBtn');
+    const openBtn = document.getElementById('openBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const decreaseFontBtn = document.getElementById('decreaseFontBtn');
+    const increaseFontBtn = document.getElementById('increaseFontBtn');
+    const fileInput = document.getElementById('fileInput');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+
+    let currentFontSize = 18; // px
+    const minFontSize = 12;
+    const maxFontSize = 80;
+
+    function updateEditorFontSize() {
+      editor.style.fontSize = currentFontSize + 'px';
+    }
+
+    decreaseFontBtn.addEventListener('click', () => {
+      if (currentFontSize > minFontSize) {
+        currentFontSize -= 2;
+        updateEditorFontSize();
+      }
+    });
+
+    increaseFontBtn.addEventListener('click', () => {
+      if (currentFontSize < maxFontSize) {
+        currentFontSize += 2;
+        updateEditorFontSize();
+      }
+    });
+
+    newBtn.addEventListener('click', () => {
+      if (confirm('Clear current document and start new? Unsaved changes will be lost.')) {
+        editor.innerHTML = '';
+        editor.focus();
+      }
+    });
+
+    openBtn.addEventListener('click', () => {
+      fileInput.value = '';
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const text = reader.result;
+        if (file.name.endsWith('.html')) {
+          editor.innerHTML = text;
+        } else {
+          editor.textContent = text;
+        }
+        editor.focus();
+      };
+      reader.readAsText(file);
+    });
+
+    saveBtn.addEventListener('click', () => {
+      saveFile();
+    });
+
+    function saveFile() {
+      let blob = new Blob([editor.innerHTML], {type: "text/html"});
+      let url = URL.createObjectURL(blob);
+      let a = document.createElement('a');
+      a.href = url;
+      a.download = 'document.txt';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 0);
+    }
+
+    function setDarkMode(enabled) {
+      if (enabled) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+      localStorage.setItem('darkMode', enabled ? 'true' : 'false');
+    }
+
+    darkModeToggle.addEventListener('click', () => {
+      const isDark = document.body.classList.contains('dark-mode');
+      setDarkMode(!isDark);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.ctrlKey || event.metaKey) {
+        switch(event.key.toLowerCase()) {
+          case 's':
+            event.preventDefault();
+            saveFile();
+            break;
+          case 'o':
+            event.preventDefault();
+            fileInput.click();
+            break;
+          case 'n':
+            event.preventDefault();
+            if (confirm('Clear current document and start new? Unsaved changes will be lost.')) {
+              editor.innerHTML = '';
+            }
+            break;
+          case '-':
+            event.preventDefault();
+            if (currentFontSize > minFontSize) {
+              currentFontSize -= 2;
+              updateEditorFontSize();
+            }
+            break;
+          case '+':
+          case '=':
+            event.preventDefault();
+            if (currentFontSize < maxFontSize) {
+              currentFontSize += 2;
+              updateEditorFontSize();
+            }
+            break;
+          case 'd':
+            event.preventDefault();
+            const isDark = document.body.classList.contains('dark-mode');
+            setDarkMode(!isDark);
+            break;
+        }
+      }
+    });
+
+    updateEditorFontSize();
+    editor.focus();
+    const darkModePref = localStorage.getItem('darkMode');
+    if (darkModePref === 'true') {
+      setDarkMode(true);
+    }
+  });
+</script>
+</body>
+</html>
