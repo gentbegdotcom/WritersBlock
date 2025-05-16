@@ -242,7 +242,7 @@ body.dark-mode #closeAboutBtn:hover {
      
     <div id="aboutBox">
         <h3>About WritersBlock</h3>
-        <p><a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">CC0 1.0 Universal</a><br>This work has been dedicated to the public domain by its author.</p><p>Version 1.0</p>
+        <p><a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">CC0 1.0 Universal</a><br>This work has been dedicated to the public domain by its author.</p><p>Version 1.0.2</p>
         <p>A simple, distraction-free word processor.</p>
         <button type="abt" id="closeAboutBtn">Close</button>
     </div>
@@ -273,7 +273,7 @@ body.dark-mode #closeAboutBtn:hover {
     <button type="button" id="decreaseFontBtn" title="Decrease font size" aria-label="Decrease font size">A</button>
     <button type="button" id="increaseFontBtn" title="Increase font size" aria-label="Increase font size">A</button>
     <div style="border-left: 1px solid #ccc; height: 20px; margin: 0 10px;"></div>
-    <button type="button" id="fontSpaceBtn" title="Change Font Width" aria-label="Change Font Width">F</button>
+    <button type="button" id="fontSpaceBtn" title="Change Font Width" aria-label="Switch to Mono Font">P/M</button>
     <div style="border-left: 1px solid #ccc; height: 20px; margin: 0 10px;"></div>
     <button type="button" id="darkModeToggle" title="Toggle Dark Mode" aria-label="Toggle Dark Mode" tabindex="0">
         <!-- Crescent moon icon -->
@@ -294,8 +294,8 @@ body.dark-mode #closeAboutBtn:hover {
   <input type="file" id="fileInput" accept=".txt,.html" style="display:none" />
 
   <script>
-    /* about box */
-    document.addEventListener("DOMContentLoaded", () => {
+      /* about box */
+      document.addEventListener("DOMContentLoaded", () => {
         const aboutBtn = document.getElementById('aboutBtn');
         const aboutBox = document.getElementById('aboutBox');
         const closeAboutBtn = document.getElementById('closeAboutBtn');
@@ -314,186 +314,187 @@ body.dark-mode #closeAboutBtn:hover {
         const modalBackdrop = document.getElementById('modalBackdrop');
         const fontSpaceBtn = document.getElementById('fontSpaceBtn');
         let isMonospace = false;
-
+    
         let currentFontSize = 18; // px
         const minFontSize = 12;
         const maxFontSize = 80;
     
-        function changeSpacing() {
-          fontspaceBtn.addEventListener('click', () => {
-            isMonospace = !isMonospace;
-            if (isMonospace) {
-              // Apply monospace font
-                editor.style.fontFamily = 'monospace, Consolas, Courier New, Monaco, sans-serif';
-                fontSpaceBtn.textContent = 'M'; // Update button text to indicate Monospace
-                fontSpaceBtn.title = 'Switch to Proportional Font';
-                fontSpaceBtn.ariaLabel = 'Switch to Proportional Font';
-            } else {
-                // Apply proportional font (revert to your default)
-                editor.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
-                fontSpaceBtn.textContent = 'F'; // Update button text to indicate Proportional
-                fontSpaceBtn.title = 'Change Font Width';
-                fontSpaceBtn.ariaLabel = 'Change Font Width';
-            }
-        }
-      }
         function updateEditorFontSize() {
-            editor.style.fontSize = currentFontSize + 'px';
+          editor.style.fontSize = currentFontSize + 'px';
         }
     
         decreaseFontBtn.addEventListener('click', () => {
-            if (currentFontSize > minFontSize) {
-                currentFontSize -= 2;
-                updateEditorFontSize();
-            }
+          if (currentFontSize > minFontSize) {
+            currentFontSize -= 2;
+            updateEditorFontSize();
+          }
         });
     
         increaseFontBtn.addEventListener('click', () => {
-            if (currentFontSize < maxFontSize) {
-                currentFontSize += 2;
-                updateEditorFontSize();
-            }
+          if (currentFontSize < maxFontSize) {
+            currentFontSize += 2;
+            updateEditorFontSize();
+          }
         });
     
         newBtn.addEventListener('click', () => {
-            if (confirm('Clear current document and start new? Unsaved changes will be lost.')) {
-                editor.innerHTML = '';
-                editor.focus();
-            }
+          if (confirm('Clear current document and start new? Unsaved changes will be lost.')) {
+            editor.innerHTML = '';
+            editor.focus();
+          }
         });
     
         openBtn.addEventListener('click', () => {
-            fileInput.value = '';
-            fileInput.click();
+          fileInput.value = '';
+          fileInput.click();
         });
     
         fileInput.addEventListener('change', e => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = () => {
-                const text = reader.result;
-                editor.textContent = file.name.endsWith('.html') ? text : text;
-                editor.focus();
-            };
-            reader.readAsText(file);
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            const text = reader.result;
+            editor.textContent = file.name.endsWith('.html') ? text : text;
+            editor.focus();
+          };
+          reader.readAsText(file);
         });
     
         /* Save-as functionality */
         saveBtn.addEventListener('click', () => {
-            // Show the "Save As" modal
-            saveAsModal.style.display = 'block';
-            modalBackdrop.style.display = 'block';
-            filenameInput.focus(); // Focus on the input field
+          // Show the "Save As" modal
+          saveAsModal.style.display = 'block';
+          modalBackdrop.style.display = 'block';
+          filenameInput.focus(); // Focus on the input field
         });
     
         saveAsCancelBtn.addEventListener('click', () => {
-            // Hide the "Save As" modal
-            saveAsModal.style.display = 'none';
-            modalBackdrop.style.display = 'none';
+          // Hide the "Save As" modal
+          saveAsModal.style.display = 'none';
+          modalBackdrop.style.display = 'none';
         });
     
         saveAsConfirmBtn.addEventListener('click', () => {
-            // Get the filename from the input
-            const desiredFilename = filenameInput.value.trim();
-            if (desiredFilename) {
-                // Perform the save with the desired filename
-                saveFileAs(desiredFilename);
-            } else {
-                alert('Please enter a filename.');
-            }
-            // Hide the modal after saving (or if cancelled)
-            saveAsModal.style.display = 'none';
-            modalBackdrop.style.display = 'none';
-        });
-    
-        function saveFileAs(filename) {
-    const content = editor.textContent; // Use textContent to get plain text
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${filename}.txt`; // Change the extension to .txt
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
+          // Get the filename from the input
+          const desiredFilename = filenameInput.value.trim();
+          if (desiredFilename) {
+            //// Perform the save with the desired filename
+        saveFileAs(desiredFilename);
+      } else {
+        alert('Please enter a filename.');
+      }
+      // Hide the modal after saving (or if cancelled)
+      saveAsModal.style.display = 'none';
+      modalBackdrop.style.display = 'none';
+    });
+
+    function saveFileAs(filename) {
+      const content = editor.textContent; // Use textContent to get plain text
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${filename}.txt`; // Change the extension to .txt
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-    }, 0);
-}
-        /* End Save-as functionality */
-    
-        function setDarkMode(enabled) {
-            document.body.classList.toggle('dark-mode', enabled);
-            localStorage.setItem('darkMode', enabled ? 'true' : 'false');
-        }
-    
-        darkModeToggle.addEventListener('click', () => {
-            setDarkMode(!document.body.classList.contains('dark-mode'));
-        });
-    
-        document.addEventListener('keydown', (event) => {
-            if (event.ctrlKey || event.metaKey) {
-                switch (event.key.toLowerCase()) {
-                    case 's':
-                        event.preventDefault();
-                        saveBtn.click(); // Trigger the "Save" button click to show the modal
-                        break;
-                    case 'o':
-                        event.preventDefault();
-                        fileInput.click();
-                        break;
-                    case 'n':
-                        event.preventDefault();
-                        if (confirm('Clear current document and start new? Unsaved changes will be lost.')) {
-                            editor.innerHTML = '';
-                        }
-                        break;
-                    case '-':
-                        event.preventDefault();
-                        if (currentFontSize > minFontSize) {
-                            currentFontSize -= 2;
-                            updateEditorFontSize();
-                        }
-                        break;
-                    case '+':
-                    case '=':
-                        event.preventDefault();
-                        if (currentFontSize < maxFontSize) {
-                            currentFontSize += 2;
-                            updateEditorFontSize();
-                        }
-                        break;
-                    case 'd':
-                        event.preventDefault();
-                        setDarkMode(!document.body.classList.contains('dark-mode'));
-                        break;
-                }
-            }
-        });
-    
-        /* About box logic (moved inside the main listener) */
-        aboutBtn.addEventListener('click', () => {
-            aboutBox.style.display = 'flex';
-        });
-    
-        closeAboutBtn.addEventListener('click', () => {
-            aboutBox.style.display = 'none';
-        });
-    
-        window.addEventListener('click', (event) => {
-            if (event.target === aboutBox) {
-                aboutBox.style.display = 'none';
-            }
-        });
-        /* End about box logic */
-    
-        updateEditorFontSize();
-        editor.focus();
-        if (localStorage.getItem('darkMode') === 'true') {
-            setDarkMode(true);
-        }
+      }, 0);
+    }
+    /* End Save-as functionality */
+
+    function changeSpacing() {
+      isMonospace = !isMonospace;
+      if (isMonospace) {
+        // Apply monospace font
+        editor.style.fontFamily = 'monospace, Consolas, Courier New, Monaco, sans-serif';
+        fontSpaceBtn.textContent = 'M/P'; // Update button text to indicate Monospace
+        fontSpaceBtn.title = 'Switch to Proportional Font';
+        fontSpaceBtn.ariaLabel = 'Switch to Proportional Font';
+      } else {
+        // Apply proportional font (revert to your default)
+        editor.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+        fontSpaceBtn.textContent = 'P/M'; // Update button text to indicate Proportional
+        fontSpaceBtn.title = 'Switch to Mono Font';
+        fontSpaceBtn.ariaLabel = 'Switch to Mono Font';
+      }
+    }
+
+    fontSpaceBtn.addEventListener('click', changeSpacing); // Attach the listener here
+
+    function setDarkMode(enabled) {
+      document.body.classList.toggle('dark-mode', enabled);
+      localStorage.setItem('darkMode', enabled ? 'true' : 'false');
+    }
+
+    darkModeToggle.addEventListener('click', () => {
+      setDarkMode(!document.body.classList.contains('dark-mode'));
     });
-    </script>
+
+    document.addEventListener('keydown', (event) => {
+      if (event.ctrlKey || event.metaKey) {
+        switch (event.key.toLowerCase()) {
+          case 's':
+            event.preventDefault();
+            saveBtn.click(); // Trigger the "Save" button click to show the modal
+            break;
+          case 'o':
+            event.preventDefault();
+            fileInput.click();
+            break;
+          case 'n':
+            event.preventDefault();
+            if (confirm('Clear current document and start new? Unsaved changes will be lost.')) {
+              editor.innerHTML = '';
+            }
+            break;
+          case '-':
+            event.preventDefault();
+            if (currentFontSize > minFontSize) {
+              currentFontSize -= 2;
+              updateEditorFontSize();
+            }
+            break;
+          case '+':
+          case '=':
+            event.preventDefault();
+            if (currentFontSize < maxFontSize) {
+              currentFontSize += 2;
+              updateEditorFontSize();
+            }
+            break;
+          case 'd':
+            event.preventDefault();
+            setDarkMode(!document.body.classList.contains('dark-mode'));
+            break;
+        }
+      }
+    });
+
+    /* About box logic (moved inside the main listener) */
+    aboutBtn.addEventListener('click', () => {
+      aboutBox.style.display = 'flex';
+    });
+
+    closeAboutBtn.addEventListener('click', () => {
+      aboutBox.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+      if (event.target === aboutBox) {
+        aboutBox.style.display = 'none';
+      }
+    });
+    /* End about box logic */
+
+    updateEditorFontSize();
+    editor.focus();
+    if (localStorage.getItem('darkMode') === 'true') {
+      setDarkMode(true);
+    }
+  });
+  </script>
 </body>
 </html>
