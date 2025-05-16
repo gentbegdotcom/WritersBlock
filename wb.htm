@@ -82,6 +82,10 @@
     font-weight: 900;
     font-size: 24px;
   }
+  #fontSpaceBtn {
+      font-size: 20px;
+      font-weight: 700;
+    }
   /* Editor area */
   #editor {
     flex: 1;
@@ -160,6 +164,10 @@
     }
     #increaseFontBtn {
       font-size: 20px;
+    }
+    #fontSpaceBtn {
+      font-size: 20px;
+      font-weight: 700;
     }
   }
 #aboutBox {
@@ -265,6 +273,8 @@ body.dark-mode #closeAboutBtn:hover {
     <button type="button" id="decreaseFontBtn" title="Decrease font size" aria-label="Decrease font size">A</button>
     <button type="button" id="increaseFontBtn" title="Increase font size" aria-label="Increase font size">A</button>
     <div style="border-left: 1px solid #ccc; height: 20px; margin: 0 10px;"></div>
+    <button type="button" id="fontSpaceBtn" title="Change Font Width" aria-label="Change Font Width">F</button>
+    <div style="border-left: 1px solid #ccc; height: 20px; margin: 0 10px;"></div>
     <button type="button" id="darkModeToggle" title="Toggle Dark Mode" aria-label="Toggle Dark Mode" tabindex="0">
         <!-- Crescent moon icon -->
        <svg viewBox="0 0 24 24">
@@ -302,11 +312,31 @@ body.dark-mode #closeAboutBtn:hover {
         const saveAsConfirmBtn = document.getElementById('saveAsConfirmBtn');
         const saveAsCancelBtn = document.getElementById('saveAsCancelBtn');
         const modalBackdrop = document.getElementById('modalBackdrop');
-    
+        const fontSpaceBtn = document.getElementById('fontSpaceBtn');
+        let isMonospace = false;
+
         let currentFontSize = 18; // px
         const minFontSize = 12;
         const maxFontSize = 80;
     
+        function changeSpacing() {
+          fontspaceBtn.addEventListener('click', () => {
+            isMonospace = !isMonospace;
+            if (isMonospace) {
+              // Apply monospace font
+                editor.style.fontFamily = 'monospace, Consolas, Courier New, Monaco, sans-serif';
+                fontSpaceBtn.textContent = 'M'; // Update button text to indicate Monospace
+                fontSpaceBtn.title = 'Switch to Proportional Font';
+                fontSpaceBtn.ariaLabel = 'Switch to Proportional Font';
+            } else {
+                // Apply proportional font (revert to your default)
+                editor.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+                fontSpaceBtn.textContent = 'F'; // Update button text to indicate Proportional
+                fontSpaceBtn.title = 'Change Font Width';
+                fontSpaceBtn.ariaLabel = 'Change Font Width';
+            }
+        }
+      }
         function updateEditorFontSize() {
             editor.style.fontSize = currentFontSize + 'px';
         }
