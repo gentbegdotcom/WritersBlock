@@ -239,6 +239,17 @@ body.dark-mode #closeAboutBtn:hover {
         <button type="abt" id="closeAboutBtn">Close</button>
     </div>
 
+    <div id="saveAsModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #f9f9f9; border: 1px solid #ccc; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 1001;">
+        <h3>Save As</h3>
+        <label for="filenameInput">Filename:</label>
+        <input type="text" id="filenameInput" value="document">
+        <div style="margin-top: 10px; display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" id="saveAsConfirmBtn">Save</button>
+            <button type="button" id="saveAsCancelBtn">Cancel</button>
+        </div>
+    </div>
+    <div id="modalBackdrop" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000;"></div>
+
   <div id="toolbar" role="toolbar" aria-label="Text editor controls">
     <div style="display: flex; align-items: center; gap: 8px;">
     <button type="button" id="newBtn" title="New (Ctrl+N)" aria-label="New document" >
@@ -272,170 +283,187 @@ body.dark-mode #closeAboutBtn:hover {
 
   <input type="file" id="fileInput" accept=".txt,.html" style="display:none" />
 
-<script>
-/* about box */
-document.addEventListener("DOMContentLoaded", () => {
-  const aboutBtn = document.getElementById('aboutBtn');
-  const aboutBox = document.getElementById('aboutBox');
-  const closeAboutBtn = document.getElementById('closeAboutBtn');
-
-  aboutBtn.addEventListener('click', () => {
-    aboutBox.style.display = 'flex';
-  });
-
-  closeAboutBtn.addEventListener('click', () => {
-    aboutBox.style.display = 'none';
-  });
-
-  // Optional: Close the about box if the user clicks outside of it
-  window.addEventListener('click', (event) => {
-    if (event.target === aboutBox) {
-      aboutBox.style.display = 'none';
-    }
-  });
-});
-/* end about box */
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const editor = document.getElementById('editor');
-    const newBtn = document.getElementById('newBtn');
-    const openBtn = document.getElementById('openBtn');
-    const saveBtn = document.getElementById('saveBtn');
-    const decreaseFontBtn = document.getElementById('decreaseFontBtn');
-    const increaseFontBtn = document.getElementById('increaseFontBtn');
-    const fileInput = document.getElementById('fileInput');
-    const darkModeToggle = document.getElementById('darkModeToggle');
-
-    let currentFontSize = 18; // px
-    const minFontSize = 12;
-    const maxFontSize = 80;
-
-    function updateEditorFontSize() {
-      editor.style.fontSize = currentFontSize + 'px';
-    }
-
-    decreaseFontBtn.addEventListener('click', () => {
-      if (currentFontSize > minFontSize) {
-        currentFontSize -= 2;
-        updateEditorFontSize();
-      }
-    });
-
-    increaseFontBtn.addEventListener('click', () => {
-      if (currentFontSize < maxFontSize) {
-        currentFontSize += 2;
-        updateEditorFontSize();
-      }
-    });
-
-    newBtn.addEventListener('click', () => {
-      if (confirm('Clear current document and start new? Unsaved changes will be lost.')) {
-        editor.innerHTML = '';
-        editor.focus();
-      }
-    });
-
-    openBtn.addEventListener('click', () => {
-      fileInput.value = '';
-      fileInput.click();
-    });
-
-    fileInput.addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        const text = reader.result;
-        if (file.name.endsWith('.html')) {
-          editor.innerHTML = text;
-        } else {
-          editor.textContent = text;
+  <script>
+    /* about box */
+    document.addEventListener("DOMContentLoaded", () => {
+        const aboutBtn = document.getElementById('aboutBtn');
+        const aboutBox = document.getElementById('aboutBox');
+        const closeAboutBtn = document.getElementById('closeAboutBtn');
+        const editor = document.getElementById('editor');
+        const newBtn = document.getElementById('newBtn');
+        const openBtn = document.getElementById('openBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const decreaseFontBtn = document.getElementById('decreaseFontBtn');
+        const increaseFontBtn = document.getElementById('increaseFontBtn');
+        const fileInput = document.getElementById('fileInput');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const saveAsModal = document.getElementById('saveAsModal');
+        const filenameInput = document.getElementById('filenameInput');
+        const saveAsConfirmBtn = document.getElementById('saveAsConfirmBtn');
+        const saveAsCancelBtn = document.getElementById('saveAsCancelBtn');
+        const modalBackdrop = document.getElementById('modalBackdrop');
+    
+        let currentFontSize = 18; // px
+        const minFontSize = 12;
+        const maxFontSize = 80;
+    
+        function updateEditorFontSize() {
+            editor.style.fontSize = currentFontSize + 'px';
         }
-        editor.focus();
-      };
-      reader.readAsText(file);
-    });
-
-    saveBtn.addEventListener('click', () => {
-      saveFile();
-    });
-
-    function saveFile() {
-      let blob = new Blob([editor.innerHTML], {type: "text/html"});
-      let url = URL.createObjectURL(blob);
-      let a = document.createElement('a');
-      a.href = url;
-      a.download = 'document.txt';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
+    
+        decreaseFontBtn.addEventListener('click', () => {
+            if (currentFontSize > minFontSize) {
+                currentFontSize -= 2;
+                updateEditorFontSize();
+            }
+        });
+    
+        increaseFontBtn.addEventListener('click', () => {
+            if (currentFontSize < maxFontSize) {
+                currentFontSize += 2;
+                updateEditorFontSize();
+            }
+        });
+    
+        newBtn.addEventListener('click', () => {
+            if (confirm('Clear current document and start new? Unsaved changes will be lost.')) {
+                editor.innerHTML = '';
+                editor.focus();
+            }
+        });
+    
+        openBtn.addEventListener('click', () => {
+            fileInput.value = '';
+            fileInput.click();
+        });
+    
+        fileInput.addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                const text = reader.result;
+                editor.textContent = file.name.endsWith('.html') ? text : text;
+                editor.focus();
+            };
+            reader.readAsText(file);
+        });
+    
+        /* Save-as functionality */
+        saveBtn.addEventListener('click', () => {
+            // Show the "Save As" modal
+            saveAsModal.style.display = 'block';
+            modalBackdrop.style.display = 'block';
+            filenameInput.focus(); // Focus on the input field
+        });
+    
+        saveAsCancelBtn.addEventListener('click', () => {
+            // Hide the "Save As" modal
+            saveAsModal.style.display = 'none';
+            modalBackdrop.style.display = 'none';
+        });
+    
+        saveAsConfirmBtn.addEventListener('click', () => {
+            // Get the filename from the input
+            const desiredFilename = filenameInput.value.trim();
+            if (desiredFilename) {
+                // Perform the save with the desired filename
+                saveFileAs(desiredFilename);
+            } else {
+                alert('Please enter a filename.');
+            }
+            // Hide the modal after saving (or if cancelled)
+            saveAsModal.style.display = 'none';
+            modalBackdrop.style.display = 'none';
+        });
+    
+        function saveFileAs(filename) {
+    const content = editor.textContent; // Use textContent to get plain text
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}.txt`; // Change the extension to .txt
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-      }, 0);
-    }
-
-    function setDarkMode(enabled) {
-      if (enabled) {
-        document.body.classList.add('dark-mode');
-      } else {
-        document.body.classList.remove('dark-mode');
-      }
-      localStorage.setItem('darkMode', enabled ? 'true' : 'false');
-    }
-
-    darkModeToggle.addEventListener('click', () => {
-      const isDark = document.body.classList.contains('dark-mode');
-      setDarkMode(!isDark);
-    });
-
-    document.addEventListener('keydown', (event) => {
-      if (event.ctrlKey || event.metaKey) {
-        switch(event.key.toLowerCase()) {
-          case 's':
-            event.preventDefault();
-            saveFile();
-            break;
-          case 'o':
-            event.preventDefault();
-            fileInput.click();
-            break;
-          case 'n':
-            event.preventDefault();
-            if (confirm('Clear current document and start new? Unsaved changes will be lost.')) {
-              editor.innerHTML = '';
-            }
-            break;
-          case '-':
-            event.preventDefault();
-            if (currentFontSize > minFontSize) {
-              currentFontSize -= 2;
-              updateEditorFontSize();
-            }
-            break;
-          case '+':
-          case '=':
-            event.preventDefault();
-            if (currentFontSize < maxFontSize) {
-              currentFontSize += 2;
-              updateEditorFontSize();
-            }
-            break;
-          case 'd':
-            event.preventDefault();
-            const isDark = document.body.classList.contains('dark-mode');
-            setDarkMode(!isDark);
-            break;
+    }, 0);
+}
+        /* End Save-as functionality */
+    
+        function setDarkMode(enabled) {
+            document.body.classList.toggle('dark-mode', enabled);
+            localStorage.setItem('darkMode', enabled ? 'true' : 'false');
         }
-      }
+    
+        darkModeToggle.addEventListener('click', () => {
+            setDarkMode(!document.body.classList.contains('dark-mode'));
+        });
+    
+        document.addEventListener('keydown', (event) => {
+            if (event.ctrlKey || event.metaKey) {
+                switch (event.key.toLowerCase()) {
+                    case 's':
+                        event.preventDefault();
+                        saveBtn.click(); // Trigger the "Save" button click to show the modal
+                        break;
+                    case 'o':
+                        event.preventDefault();
+                        fileInput.click();
+                        break;
+                    case 'n':
+                        event.preventDefault();
+                        if (confirm('Clear current document and start new? Unsaved changes will be lost.')) {
+                            editor.innerHTML = '';
+                        }
+                        break;
+                    case '-':
+                        event.preventDefault();
+                        if (currentFontSize > minFontSize) {
+                            currentFontSize -= 2;
+                            updateEditorFontSize();
+                        }
+                        break;
+                    case '+':
+                    case '=':
+                        event.preventDefault();
+                        if (currentFontSize < maxFontSize) {
+                            currentFontSize += 2;
+                            updateEditorFontSize();
+                        }
+                        break;
+                    case 'd':
+                        event.preventDefault();
+                        setDarkMode(!document.body.classList.contains('dark-mode'));
+                        break;
+                }
+            }
+        });
+    
+        /* About box logic (moved inside the main listener) */
+        aboutBtn.addEventListener('click', () => {
+            aboutBox.style.display = 'flex';
+        });
+    
+        closeAboutBtn.addEventListener('click', () => {
+            aboutBox.style.display = 'none';
+        });
+    
+        window.addEventListener('click', (event) => {
+            if (event.target === aboutBox) {
+                aboutBox.style.display = 'none';
+            }
+        });
+        /* End about box logic */
+    
+        updateEditorFontSize();
+        editor.focus();
+        if (localStorage.getItem('darkMode') === 'true') {
+            setDarkMode(true);
+        }
     });
-
-    updateEditorFontSize();
-    editor.focus();
-    const darkModePref = localStorage.getItem('darkMode');
-    if (darkModePref === 'true') {
-      setDarkMode(true);
-    }
-  });
-</script>
+    </script>
 </body>
 </html>
